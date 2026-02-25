@@ -1,11 +1,11 @@
 package com.example.demo.service;
 
+import com.example.demo.entity.User;
+import com.example.demo.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import com.example.demo.entity.User;
-import com.example.demo.repository.UserRepository;
 
 @Service
 public class UserService {
@@ -20,6 +20,7 @@ public class UserService {
     }
 
     public User registerUser(User user) {
+
         // Check if username or email already exists
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             throw new RuntimeException("Username is already taken");
