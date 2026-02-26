@@ -27,6 +27,13 @@ public class JWTToken {
 
     @Column(nullable = false) // Ensures that the expiration time cannot be null.
     private LocalDateTime expiresAt; // Stores the expiration time of the token.
+    
+    
+
+	public JWTToken() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	public JWTToken(Integer tokenId, User user, String token, LocalDateTime expiresAt) {
 		super();

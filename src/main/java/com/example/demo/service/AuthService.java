@@ -1,9 +1,7 @@
 package com.example.demo.service;
-
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,15 +13,16 @@ import com.example.demo.entity.User;
 import com.example.demo.repository.JWTTokenRepository;
 import com.example.demo.repository.UserRepository;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.SignatureException;
+import java.security.Key;
+import java.nio.charset.StandardCharsets;
+
 @Service
-public class AuthService{
+public class AuthService {
 
     private final Key SIGNING_KEY;
 
@@ -73,33 +72,31 @@ public class AuthService{
         return token;
     }
 
-    private String generateNewToken(User user) {
+    public String generateToken(String username) {
         return Jwts.builder()
-                .setSubject(user.getUsername())
-                .claim("role", user.getRole().name())
+                .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // 1 hour
-                .signWith(SIGNING_KEY, SignatureAlgorithm.HS512)
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 day
+                .signWith(SIGNING_KEY)
                 .compact();
     }
-
     public void saveToken(User user, String token) {
         JWTToken jwtToken = new JWTToken(user, token, LocalDateTime.now().plusHours(1));
         jwtTokenRepository.save(jwtToken);
     }
-    
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
-                    .setSigningKey(SIGNING_KEY)
-                    .build()
-                    .parseClaimsJws(token);
+                .setSigningKey(SIGNING_KEY)
+                .build()
+                .parseClaimsJws(token);
             return true;
         } catch (Exception e) {
             return false;
         }
     }
 
+    // ✅ Extract Username
     public String extractUsername(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(SIGNING_KEY)
@@ -108,5 +105,14 @@ public class AuthService{
                 .getBody();
 
         return claims.getSubject();
+    }
+    private String generateNewToken(User user) {
+        return Jwts.builder()
+                .setSubject(user.getUsername())
+                .claim("role", user.getRole().name())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // 1 hour
+                .signWith(SIGNING_KEY, SignatureAlgorithm.HS512)
+                .compact();
     }
 }

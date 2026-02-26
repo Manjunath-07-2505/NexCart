@@ -31,7 +31,7 @@ public class AuthenticationFilter implements Filter {
     private final AuthService authService;
     private final UserRepository userRepository;
 
-    private static final String ALLOWED_ORIGIN = " http://localhost:5173";
+    private static final String ALLOWED_ORIGIN = "http://localhost:5173";
 
     private static final String[] UNAUTHENTICATED_PATHS = {
         "/api/users/register",
@@ -77,7 +77,12 @@ public class AuthenticationFilter implements Filter {
         }
 
         // Extract and validate the token
-        String token = getAuthTokenFromCookies(httpRequest);
+        String token = null;
+
+        String header = httpRequest.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            token = header.substring(7);
+        }
         System.out.println(token);
         if (token == null || !authService.validateToken(token)) {
             sendErrorResponse(httpResponse, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Invalid or missing token");

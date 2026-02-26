@@ -1,12 +1,15 @@
 package com.example.demo.repository;
 
-import java.util.Optional;
+import com.example.demo.entity.CartItem;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
-import com.example.demo.entity.Cart_item;
+import java.util.*;
 
-public interface CartRepository extends JpaRepository<Cart_item, Integer> {
+@Repository
+public interface CartRepository extends JpaRepository<CartItem, Integer> {
 
-    Optional<Cart_item> findByUser_UserIdAndProduct_ProductId(
-            Integer userId, Integer productId);
+    @Query("SELECT c FROM CartItem c JOIN FETCH c.product p LEFT JOIN FETCH ProductImage pi ON p.productId = pi.product.productId WHERE c.user.userId = :userId")
+    List<CartItem> findCartItemsWithProductDetails(int userId);
 }
