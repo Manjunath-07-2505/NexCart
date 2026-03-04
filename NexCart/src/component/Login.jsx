@@ -2,21 +2,20 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import bgImage from "../assets/Background.jpeg";
-import "./Register.css";   // reuse same CSS
+import "./Register.css";
 
 function Login() {
-
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     username: "",
-    password: ""
+    password: "",
   });
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -24,23 +23,30 @@ function Login() {
     e.preventDefault();
 
     try {
-      await axios.post("http://localhost:9090/api/auth/login", {
-  username,
-  password
-});
+      const response = await axios.post(
+        "http://localhost:9090/api/auth/login",
+        {
+          username: formData.username,
+          password: formData.password,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      console.log("Login Response:", response.data);
+
+      // Save token
+      localStorage.setItem("token", response.data.token);
 
       alert("Login Successful ✅");
 
-      console.log(response.data);
-
-      // redirect after login
-      setTimeout(() => {
-        navigate("/");
-      }, 1000);
+      // Redirect to dashboard
+      navigate("/dashboard");
 
     } catch (error) {
+      console.error("Login Error:", error.response?.data || error.message);
       alert("Invalid Username or Password ❌");
-      console.error(error);
     }
   };
 
@@ -51,14 +57,13 @@ function Login() {
         backgroundImage: `url(${bgImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        backgroundRepeat: "no-repeat"
+        backgroundRepeat: "no-repeat",
       }}
     >
       <div className="register-card">
         <h2>Login</h2>
 
         <form onSubmit={handleSubmit} autoComplete="off">
-
           <input
             type="text"
             name="username"
@@ -74,7 +79,6 @@ function Login() {
             placeholder="Enter Password"
             value={formData.password}
             onChange={handleChange}
-            autoComplete="new-password"
             required
           />
 
@@ -83,7 +87,6 @@ function Login() {
           <p className="login-text">
             New user? <Link to="/">Register here</Link>
           </p>
-
         </form>
       </div>
     </div>
